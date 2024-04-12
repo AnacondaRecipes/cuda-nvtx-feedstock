@@ -51,7 +51,7 @@ outputs:
       build:
         - {{ compiler("c") }}
         - {{ compiler("cxx") }}
-        - arm-variant * {{ arm_variant_type }}  # [aarch64]
+        #- arm-variant * {{ arm_variant_type }}  # [aarch64]
         - patchelf <0.18.0  # [linux]
       host:
         - cuda-version {{ cuda_version }}
@@ -85,7 +85,7 @@ outputs:
       - Library\include\targets\{{ target_name }}        # [win]
     requirements:
       build:
-        - arm-variant * {{ arm_variant_type }}  # [aarch64]
+        #- arm-variant * {{ arm_variant_type }}  # [aarch64]
       host:
         - cuda-version {{ cuda_version }}
       run:
