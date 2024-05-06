@@ -1,0 +1,5 @@
+# don't skip existing. For an unknown reason Windows doesn't build without this. Error message is
+# "UnavailableInvalidChannel: HTTP 404 UNAVAILABLE OR INVALID for channel upload <file:///C:/b/abs_76yw4nerzf/upload>"
+build_parameters:
+  - "--suppress-variables"
+  - "--error-overlinking"
