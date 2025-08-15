@@ -34,7 +34,6 @@ requirements:
 outputs:
   - name: cuda-nvtx
     build:
-      skip: true  # [not linux]
       runpath_whitelist:  # [linux]
         - $ORIGIN  # [linux]
       # Repacked binaries on linux aarch64 have flag DT_TLSDESC (GNU_HASH),
