@@ -1,6 +1,6 @@
 {% set name = "cuda-nvtx" %}
-{% set version = "12.4.127" %}
-{% set cuda_version = "12.4" %}
+{% set version = "12.8.90" %}
+{% set cuda_version = "12.8" %}
 {% set platform = "linux-x86_64" %}  # [linux64]
 {% set platform = "linux-ppc64le" %}  # [ppc64le]
 {% set platform = "linux-sbsa" %}  # [aarch64]
@@ -13,37 +13,29 @@
 {% set extension = "zip" %}  # [win]
 
 package:
-  name: {{ name|lower }}
+  name: {{ name|lower }}-split
   version: {{ version }}
 
 source:
   url: https://developer.download.nvidia.com/compute/cuda/redist/cuda_nvtx/{{ platform }}/cuda_nvtx-{{ platform }}-{{ version }}-archive.{{ extension }}
-  sha256: f3afccda5ff1e7521cca74153e92708349148294bc75559afe64d57c43763454  # [linux64]
-  sha256: 772b01a6bfe9d0191f8fdd7f75462563af1926afa2637dd816cc2e9747181536  # [ppc64le]
-  sha256: c1d60013e97108fd69caf29e5e7d9b0a1562508517fc1a2bab65c294990bd7e3  # [aarch64]
-  sha256: 95b7f96bdb2701d764d969cdadfbc439b4ab995d0a3695682da5284e14f66d21  # [win]
+  sha256: 7755524026d30e2c211d793392166517e379724d19eb9e8e352693f7d5fa0c95  # [linux64]
+  sha256: 38494bd8a9c8957eebe1beb954da434752bffbc449e1786640421f104c920460  # [aarch64]
+  sha256: 38dbd5941537fcb359137f26fe31b4e3528c504cc2a55fa10a9baaf0ff006187  # [win]
 
 build:
   number: 1
-  skip: true  # [osx or (linux and s390x)]
-  binary_relocation: false
+  skip: true  # [osx or ppc64le]
 
-test:
-  requires:
-    - patchelf  # [linux]
-  files:
-    - test-rpath.sh
-  commands:
-    - test -L $PREFIX/lib/libnvToolsExt.so.1                                # [linux]
-    - test -L $PREFIX/lib/libnvToolsExt.so.1.0.0                            # [linux]
-    - test -L $PREFIX/targets/{{ target_name }}/lib/libnvToolsExt.so.1      # [linux]
-    - test -f $PREFIX/targets/{{ target_name }}/lib/libnvToolsExt.so.1.0.0  # [linux]
-    - bash test-rpath.sh                                                    # [linux]
+requirements:
+  build:
+    - cf-nvidia-tools 1.*  # [linux]
+    - patchelf <0.18.0  # [linux]
 
 outputs:
   - name: cuda-nvtx
     build:
-        skip: true  # [not linux]
+      skip: true  # [not linux]
+      binary_relocation: false
     files:
       - lib/libnv*.so.*                       # [linux]
       - targets/{{ target_name }}/lib/*.so.*  # [linux]
@@ -51,7 +43,8 @@ outputs:
       build:
         - {{ compiler("c") }}
         - {{ compiler("cxx") }}
-        #- arm-variant * {{ arm_variant_type }}  # [aarch64]
+        - {{ stdlib("c") }}  # [linux]
+        - arm-variant * {{ arm_variant_type }}  # [aarch64]
         - patchelf <0.18.0  # [linux]
       host:
         - cuda-version {{ cuda_version }}
@@ -59,7 +52,17 @@ outputs:
         - {{ pin_compatible("cuda-version", max_pin="x.x") }}
       run_constrained:
         - arm-variant * {{ arm_variant_type }}  # [aarch64]
-    # Tests are defined at the top level, due to package/output name conflicts.
+    test:
+      requires:
+        - patchelf  # [linux]
+      files:
+        - test-rpath.sh
+      commands:
+        - test -L $PREFIX/lib/libnvToolsExt.so.1                                # [linux]
+        - test -L $PREFIX/lib/libnvToolsExt.so.1.0.0                            # [linux]
+        - test -L $PREFIX/targets/{{ target_name }}/lib/libnvToolsExt.so.1      # [linux]
+        - test -f $PREFIX/targets/{{ target_name }}/lib/libnvToolsExt.so.1.0.0  # [linux]
+        - bash test-rpath.sh                                                    # [linux]
     about:
       home: https://developer.nvidia.com/cuda-toolkit
       license_file: LICENSE
@@ -74,7 +77,8 @@ outputs:
 
   - name: cuda-nvtx-dev
     build:
-      run_exports:                                        # [linux]
+      binary_relocation: false
+      run_exports:   # [linux]
         - {{ pin_subpackage("cuda-nvtx", max_pin='x') }}  # [linux]
     files:
       - lib/libnv*.so                                    # [linux]
@@ -126,5 +130,6 @@ about:
   doc_url: https://docs.nvidia.com/nvtx/
 
 extra:
+  feedstock-name: cuda-nvtx
   recipe-maintainers:
     - conda-forge/cuda
