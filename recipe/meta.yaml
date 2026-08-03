@@ -136,6 +136,10 @@ about:
   dev_url: https://docs.nvidia.com/nvtx/
 
 extra:
+  skip-lints:
+    - deprecate_license_url
+    # Linter complains because there are no tests for Windows builds
+    - missing_tests
   feedstock-name: cuda-nvtx
   recipe-maintainers:
     - conda-forge/cuda
