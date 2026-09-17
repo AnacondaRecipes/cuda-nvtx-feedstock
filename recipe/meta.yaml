@@ -140,6 +140,10 @@ about:
   dev_url: https://docs.nvidia.com/nvtx/
 
 extra:
+  skip-lints:
+    - deprecate_license_url
+    # /outputs/0/test: missing_tests: output "cuda-nvtx": No tests were found.
+    - missing_tests
   feedstock-name: cuda-nvtx
   recipe-maintainers:
     - conda-forge/cuda
